@@ -1,0 +1,31 @@
+:root {
+    --navbar-height: 60px;
+    --bottom-nav-height: 76px;
+
+    --text-color: #ffffff;
+    --selected-text-color: #8ebbff;
+    --navbar-background: #232323;
+    --bottom-nav-background: rgb(35, 35, 35, 0.95);
+    --main-content-body-background: #30363d;
+}
+
+.App {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    touch-action: none;
+    overflow: hidden;
+    overscroll-behavior: none;
+}
+
+.AppContainer {
+    position: relative;
+    height: 100vh;
+
+    touch-action: none;
+    overflow: hidden;
+    overscroll-behavior: none;
+}

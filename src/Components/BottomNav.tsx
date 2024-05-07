@@ -1,5 +1,59 @@
-import { Heading } from "@chakra-ui/react";
+import {
+    Box,
+    Flex,
+    IconButton,
+    useColorModeValue,
+} from '@chakra-ui/react';
+import {
+    TimeIcon,
+    SettingsIcon,
+    AddIcon
+} from '@chakra-ui/icons';
+import { useNavigate } from 'react-router-dom';
 
-export const BottomNav = () => (
-    <Heading>Hello World</Heading>
-)
+export const BottomNav = () => {
+    const navigate = useNavigate()
+
+    return (
+        <Box pos="absolute" left={0} bottom={0} w="full">
+            <Flex
+                bg={useColorModeValue('white', 'gray.800')}
+                color={useColorModeValue('gray.600', 'white')}
+                minH={'60px'}
+                py={{ base: 2 }}
+                px={{ base: 4 }}
+                borderTop={1}
+                borderStyle={'solid'}
+                borderColor={useColorModeValue('gray.200', 'gray.900')}
+                align={'center'}
+                justify={'space-between'}
+            >
+
+                <Flex justify={'center'}>
+                    <IconButton
+                        onClick={() => { navigate('home') }}
+                        icon={<TimeIcon w={3} h={3} />}
+                        variant={'ghost'}
+                        aria-label={'Toggle Navigation'}
+                    />
+                </Flex>
+                <Flex justify={'center'}>
+                    <IconButton
+                        onClick={() => { navigate('new') }}
+                        icon={<AddIcon w={3} h={3} />}
+                        variant={'ghost'}
+                        aria-label={'Toggle Navigation'}
+                    />
+                </Flex>
+                <Flex justify={'center'}>
+                    <IconButton
+                        onClick={() => { navigate('profile') }}
+                        icon={<SettingsIcon w={3} h={3} />}
+                        variant={'ghost'}
+                        aria-label={'Toggle Navigation'}
+                    />
+                </Flex>
+            </Flex>
+        </Box>
+    );
+}
