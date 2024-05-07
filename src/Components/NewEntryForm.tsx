@@ -3,15 +3,15 @@ import { Form } from "./Form"
 import { useForm } from "react-hook-form"
 import { addDoc, collection } from "firebase/firestore"
 import { db } from "../firebase"
-
-type Entry = {
-    createdAt: Date,
-    amountInt: number,
-    amountDec: number,
-    type: string,
-}
+import { useAuthStore } from "../zustand/authStore"
+import { useNavigate } from "react-router-dom"
+import { Route } from "../router"
+import { Entry } from "../types/types"
 
 export const NewEntryForm = () => {
+    const { isLoggedIn, loggedUser } = useAuthStore();
+    const navigate = useNavigate();
+
     const form = useForm<Entry>({
         defaultValues: {
             createdAt: new Date(),
@@ -25,9 +25,15 @@ export const NewEntryForm = () => {
     const { register } = form;
 
     const onSubmit = form.handleSubmit(async (formData: Entry) => {
+        if (!isLoggedIn) return;
+        delete formData.id;
         const entry = { ...formData, amountDec: parseInt(`${formData.amountDec}`), amountInt: parseInt(`${formData.amountInt}`) }
-
-        await addDoc(collection(db, "users", "alexandre", "entries"), { ...entry });
+        try {
+            await addDoc(collection(db, "users", `${loggedUser.email}`, "entries"), { ...entry });
+            navigate(Route.HOME, { replace: true })
+        } catch (e) {
+            //
+        }
     })
 
     return (

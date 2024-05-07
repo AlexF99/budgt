@@ -10,6 +10,7 @@ import {
     AddIcon
 } from '@chakra-ui/icons';
 import { useNavigate } from 'react-router-dom';
+import { Route } from '../router';
 
 export const BottomNav = () => {
     const navigate = useNavigate()
@@ -31,7 +32,7 @@ export const BottomNav = () => {
 
                 <Flex justify={'center'}>
                     <IconButton
-                        onClick={() => { navigate('home') }}
+                        onClick={() => { navigate(Route.HOME, { replace: true }) }}
                         icon={<TimeIcon w={3} h={3} />}
                         variant={'ghost'}
                         aria-label={'Toggle Navigation'}
@@ -39,7 +40,7 @@ export const BottomNav = () => {
                 </Flex>
                 <Flex justify={'center'}>
                     <IconButton
-                        onClick={() => { navigate('new') }}
+                        onClick={() => { navigate(Route.NEW, { replace: true }) }}
                         icon={<AddIcon w={3} h={3} />}
                         variant={'ghost'}
                         aria-label={'Toggle Navigation'}
@@ -47,7 +48,7 @@ export const BottomNav = () => {
                 </Flex>
                 <Flex justify={'center'}>
                     <IconButton
-                        onClick={() => { navigate('profile') }}
+                        onClick={() => { navigate(Route.PROFILE, { replace: true }) }}
                         icon={<SettingsIcon w={3} h={3} />}
                         variant={'ghost'}
                         aria-label={'Toggle Navigation'}

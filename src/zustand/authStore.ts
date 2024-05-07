@@ -24,8 +24,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         (set) => ({
             ...initialState,
             setLoggedUser: (loggedUser: User) => {
-                console.log("oioioiioiiiii");
-                
                 set((state: AuthState) => ({ ...state, loggedUser, isLoggedIn: true }));
             },
             resetStore: () => { set(initialState); },

@@ -17,12 +17,8 @@ function App() {
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
       if (user) {
-        console.log(user);
-        
         setLoggedUser(user)
       } else {
-        console.log('nao log');
-
         resetStore();
       }
     });

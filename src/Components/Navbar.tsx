@@ -15,7 +15,8 @@ import {
 import Login from './Login';
 import { useAuthStore } from '../zustand/authStore';
 import { getAuth, signOut } from 'firebase/auth';
-import { Route, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { Route } from '../router';
 
 export const Navbar = () => {
   const { onClose } = useDisclosure()
@@ -71,7 +72,7 @@ export const Navbar = () => {
                   : <Button onClick={() => {
                     const auth = getAuth();
                     signOut(auth).then(() => {
-                      navigate('/')
+                      navigate(Route.HOME, { replace: true })
                     }).catch((error) => {
                       console.log(error);
                     });
