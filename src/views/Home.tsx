@@ -1,7 +1,12 @@
 import { Box, Heading } from "@chakra-ui/react";
 
-export const Home = () => (
-    <Box>
-        <Heading>Home</Heading>
-    </Box>
-)
+export const Home = () => {
+
+    
+
+    return (
+        <Box>
+            <Heading>oi</Heading>
+        </Box>
+    )
+}
