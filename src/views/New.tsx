@@ -3,7 +3,7 @@ import { NewEntryForm } from "../Components/NewEntryForm";
 
 export const New = () => (
     <Box p="5">
-        <Heading>Novo Registro</Heading>
+        <Heading mb={4}>Novo Registro</Heading>
         <NewEntryForm />
     </Box>
 )

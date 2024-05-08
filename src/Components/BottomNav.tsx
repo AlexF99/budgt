@@ -20,7 +20,7 @@ export const BottomNav = () => {
             <Flex
                 bg={useColorModeValue('white', 'gray.800')}
                 color={useColorModeValue('gray.600', 'white')}
-                minH={'60px'}
+                minH={'80px'}
                 py={{ base: 2 }}
                 px={{ base: 4 }}
                 borderTop={1}
