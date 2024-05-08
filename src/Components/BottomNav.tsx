@@ -7,6 +7,7 @@ import {
 import {
     TimeIcon,
     SettingsIcon,
+    TriangleUpIcon,
     AddIcon
 } from '@chakra-ui/icons';
 import { useNavigate } from 'react-router-dom';
@@ -34,6 +35,14 @@ export const BottomNav = () => {
                     <IconButton
                         onClick={() => { navigate(Route.HOME, { replace: true }) }}
                         icon={<TimeIcon w={3} h={3} />}
+                        variant={'ghost'}
+                        aria-label={'Toggle Navigation'}
+                    />
+                </Flex>
+                <Flex justify={'center'}>
+                    <IconButton
+                        onClick={() => { navigate(Route.CHARTS, { replace: true }) }}
+                        icon={<TriangleUpIcon w={3} h={3} />}
                         variant={'ghost'}
                         aria-label={'Toggle Navigation'}
                     />

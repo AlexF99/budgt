@@ -5,12 +5,14 @@ import { Home } from '../views/Home'
 import { NotFound } from '../views/NotFound'
 import { New } from '../views/New'
 import { Profile } from '../views/Profile'
+import { Charts } from '../views/Charts'
 
 enum Route {
     ROOT = '/',
     HOME = '/home',
     NEW = '/new',
     PROFILE = '/profile',
+    CHARTS = '/charts',
     NOTFOUND = '*',
 }
 
@@ -30,6 +32,10 @@ const publicRoutes = [
     {
         path: Route.PROFILE,
         element: <Profile />,
+    },
+    {
+        path: Route.CHARTS,
+        element: <Charts />,
     },
     {
         path: Route.NOTFOUND,

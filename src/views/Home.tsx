@@ -36,7 +36,7 @@ export const Home = () => {
 
     return (
         <Box p={4} h="calc(100vh - 140px)" overflow="auto">
-            <Heading>Resumo:</Heading>
+            <Heading as="h3" size="md">Resumo:</Heading>
             <Card mt={3}>
                 <CardBody>
                     <Flex>
@@ -57,7 +57,7 @@ export const Home = () => {
                     </Flex>
                 </CardBody>
             </Card>
-            <Heading mt={5}>Histórico:</Heading>
+            <Heading as="h3" size="md" mt={5}>Histórico:</Heading>
             {data?.history?.length ? data?.history?.map((entry: Entry) => (
                 <Card key={entry.id} mt={3}>
                     <CardBody>
