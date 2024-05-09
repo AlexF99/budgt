@@ -17,7 +17,7 @@ export const BottomNav = () => {
     const navigate = useNavigate()
 
     return (
-        <Box pos="absolute" left={0} bottom={0} w="full">
+        <Box pos="fixed" left={0} bottom={0} w="full">
             <Flex
                 bg={useColorModeValue('white', 'gray.800')}
                 color={useColorModeValue('gray.600', 'white')}
