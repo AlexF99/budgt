@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ChakraProvider } from '@chakra-ui/react'
+import { Box, ChakraProvider } from '@chakra-ui/react'
 import { Navbar } from './Components/Navbar';
 import { Outlet } from 'react-router-dom';
 import { BottomNav } from './Components/BottomNav';
@@ -33,7 +33,9 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <div className="AppContainer">
             <Navbar />
-            <Outlet />
+            <Box p={4} h="calc(100vh - 140px)" overflow="auto">
+              <Outlet />
+            </Box>
             <BottomNav />
           </div>
         </QueryClientProvider>

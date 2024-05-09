@@ -17,6 +17,8 @@
     right: 0;
 
     touch-action: none;
+    overflow: hidden;
+    overscroll-behavior: none;
 }
 
 .AppContainer {

@@ -1,5 +1,6 @@
 import {
     Button,
+    ButtonGroup,
     Flex,
     IconButton,
     Input,
@@ -13,6 +14,7 @@ import {
     ModalHeader,
     ModalOverlay,
     Select,
+    Spinner,
     useDisclosure
 } from "@chakra-ui/react"
 import { Form } from "./Form"
@@ -24,7 +26,7 @@ import { useNavigate } from "react-router-dom"
 import { Route } from "../router"
 import { Entry } from "../types/types"
 import { AddIcon } from '@chakra-ui/icons';
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 type CategoryAdd = {
     name: string
@@ -54,16 +56,6 @@ export const NewEntryForm = () => {
     const { register: registerCategory, reset: resetCategory } = categoryForm;
     const { register, setFocus, setValue, getValues } = entryForm;
 
-    const onSubmitCategory = categoryForm.handleSubmit(async (formData: CategoryAdd) => {
-        if (!isLoggedIn) return;
-        try {
-            await addDoc(collection(db, "users", `${loggedUser.email}`, "categories"), { ...formData });
-        } catch (e) { }
-        queryClient.invalidateQueries({ queryKey: ['categories'] })
-        resetCategory();
-        onClose();
-    })
-
     const onSubmit = entryForm.handleSubmit(async (formData: Entry) => {
         if (!isLoggedIn) return;
         delete formData.id;
@@ -87,11 +79,39 @@ export const NewEntryForm = () => {
         return categs;
     }
 
-    const { data: categories } = useQuery({
+    const { data: categories, isFetching } = useQuery({
         queryKey: ['categories'],
         queryFn: () => getCategories(),
         enabled: isLoggedIn && !!loggedUser.email?.length,
     })
+
+    const saveCategory = async (c: CategoryAdd) => {
+        if (!isLoggedIn) return;
+        try {
+            await addDoc(collection(db, "users", `${loggedUser.email}`, "categories"), { ...c });
+        } catch (e) { }
+    }
+
+    const { mutateAsync: mutateAsyncCategory, isPending } = useMutation({
+        mutationFn: (c: CategoryAdd) => saveCategory(c),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['categories'] })
+            resetCategory();
+            onClose();
+        }
+    })
+
+    const onSubmitCategory = categoryForm.handleSubmit(async (formData: CategoryAdd) => {
+        await mutateAsyncCategory(formData);
+    })
+
+    if (isFetching) {
+        return (
+            <Flex w="full" align="center" justify="center" h="full">
+                <Spinner />
+            </Flex>
+        )
+    }
 
     return (
         <Flex w="full" flexDirection="column">
@@ -108,10 +128,12 @@ export const NewEntryForm = () => {
                         </Form>
                     </ModalBody>
                     <ModalFooter>
-                        <Button variant='ghost' onClick={onClose}>Cancelar</Button>
-                        <Button colorScheme='blue' mr={3} onClick={onSubmitCategory}>
-                            Adicionar
-                        </Button>
+                        <ButtonGroup isDisabled={isPending}>
+                            <Button variant='ghost' onClick={onClose}>Cancelar</Button>
+                            <Button colorScheme='blue' mr={3} onClick={onSubmitCategory}>
+                                Adicionar
+                            </Button>
+                        </ButtonGroup>
                     </ModalFooter>
                 </ModalContent>
             </Modal>
