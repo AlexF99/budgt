@@ -5,7 +5,6 @@ import {
     IconButton,
     Input,
     InputGroup,
-    InputLeftAddon,
     Modal,
     ModalBody,
     ModalCloseButton,
@@ -18,33 +17,37 @@ import {
     useDisclosure
 } from "@chakra-ui/react"
 import { Form } from "./Form"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { addDoc, collection, getDocs, query } from "firebase/firestore"
 import { db } from "../firebase"
 import { useAuthStore } from "../zustand/authStore"
 import { useNavigate } from "react-router-dom"
 import { Route } from "../router"
-import { Entry } from "../types/types"
+import { EntryForm } from "../types/types"
 import { AddIcon } from '@chakra-ui/icons';
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { IMaskInput } from "react-imask"
+import { useRef } from "react"
 
 type CategoryAdd = {
     name: string
 }
 
 export const NewEntryForm = () => {
+    // use ref to get access to internal "masked = ref.current.maskRef"
+    const ref = useRef(null);
+    const inputRef = useRef(null);
     const { isLoggedIn, loggedUser } = useAuthStore();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
-    const entryForm = useForm<Entry>({
+    const entryForm = useForm<EntryForm>({
         defaultValues: {
             createdAt: new Date(),
             type: undefined,
             category: undefined,
-            amountInt: undefined,
-            amountDec: undefined,
+            amount: undefined,
         },
         shouldUnregister: false
     });
@@ -54,15 +57,18 @@ export const NewEntryForm = () => {
     });
 
     const { register: registerCategory, reset: resetCategory } = categoryForm;
-    const { register, setFocus, setValue, getValues } = entryForm;
+    const { register, control } = entryForm;
 
-    const onSubmit = entryForm.handleSubmit(async (formData: Entry) => {
+    const onSubmit = entryForm.handleSubmit(async (formData: EntryForm) => {
         if (!isLoggedIn) return;
-        delete formData.id;
-        const amountDec = parseInt(`${formData.amountDec}`);
-        const amountInt = parseInt(`${formData.amountInt}`);
-        if ((amountDec <= 0 && amountInt <= 0) || amountDec < 0 || amountInt < 0 || isNaN(amountDec)) return;
-        const entry = { ...formData, amountDec, amountInt }
+
+        const x = parseFloat(`${formData.amount}`.replace(',', '.'));
+
+        const amountInt = Math.trunc(x);
+        const amountDec = Number((x - amountInt).toFixed(2)) * 100;
+
+        const entry = { ...formData, amountDec: isNaN(amountDec) ? 0 : amountDec, amountInt }
+
         try {
             await addDoc(collection(db, "users", `${loggedUser.email}`, "entries"), { ...entry });
             navigate(Route.HOME, { replace: true })
@@ -159,23 +165,20 @@ export const NewEntryForm = () => {
                     <option value='expense'>Gasto</option>
                     <option value='gain'>Ganho</option>
                 </Select>
-                <InputGroup size="md" mb={4}>
-                    <InputLeftAddon>R$</InputLeftAddon>
-                    <Input {...register('amountInt', { required: true })}
-                        name="amountInt"
-                        onKeyUp={(k) => {
-                            const intInput = parseInt(getValues('amountInt').toString());
-                            setValue('amountInt', isNaN(intInput) ? 0 : intInput);
-                            if (k.code === "Period" || k.code === "Comma") {
-                                setFocus('amountDec')
-                            }
-                        }} />
-                    <InputLeftAddon>,</InputLeftAddon>
-                    <Input {...register('amountDec', { required: true })}
-                        name="amountDec"
-                        maxLength={2}
-                    />
-                </InputGroup>
+                <Controller
+                    control={control}
+                    name="amount"
+                    render={({ field }) =>
+                    (<IMaskInput
+                        mask={Number}
+                        radix=","
+                        unmask={true} // true|false|'typed'
+                        ref={ref}
+                        inputRef={inputRef}  // access to nested input
+                        onChange={(value) => field.onChange(value)}
+                        placeholder='Valor (R$)'
+                        style={{ border: 'none', padding: '5px', marginRight: '5px' }}
+                    />)} />
                 <Button type="button" onClick={onSubmit}>Enviar</Button>
             </Form>
         </Flex>

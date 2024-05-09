@@ -1,4 +1,4 @@
-export type Entry = {
+type Entry = {
     title: string,
     category: string,
     createdAt: Date,
@@ -7,3 +7,13 @@ export type Entry = {
     type: string,
     id?: string
 }
+
+type EntryForm = {
+    title: string,
+    category: string,
+    createdAt: Date,
+    amount: number,
+    type: string,
+}
+
+export type { Entry, EntryForm };
