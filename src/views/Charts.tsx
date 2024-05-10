@@ -4,6 +4,7 @@ import { Bar, BarChart, CartesianGrid, Legend, Pie, PieChart, ResponsiveContaine
 import { db } from "../firebase";
 import { useAuthStore } from "../zustand/authStore";
 import { useQuery } from "@tanstack/react-query";
+import { parseMoney } from "../helpers/parseMoney";
 
 export const Charts = () => {
 
@@ -43,8 +44,8 @@ export const Charts = () => {
         const totalGains = Object.keys(gains).reduce((acc, curr) => { return acc + gains[curr].amount }, 0)
         const totalExpenses = Object.keys(expenses).reduce((acc, curr) => { return acc + expenses[curr].amount }, 0)
 
-        const averageGainsPerCategory:any = Object.keys(gains).reduce((acc, k) => ({...acc, [k]: (gains[k].amount / gains[k].entries) }), {})
-        const averageExpensesPerCategory:any = Object.keys(expenses).reduce((acc, k) => ({...acc, [k]: (expenses[k].amount / expenses[k].entries) }), {})
+        const averageGainsPerCategory: any = Object.keys(gains).reduce((acc, k) => ({ ...acc, [k]: (gains[k].amount / gains[k].entries) }), {})
+        const averageExpensesPerCategory: any = Object.keys(expenses).reduce((acc, k) => ({ ...acc, [k]: (expenses[k].amount / expenses[k].entries) }), {})
 
         const result = {
             expenses: Object.keys(expenses).map(k => ({ category: k, value: expenses[k].amount, fill: getRandomColor() })),
@@ -105,8 +106,8 @@ export const Charts = () => {
                         <Heading as="h4" size="sm">Média dos gastos por categoria:</Heading>
                         <Box>
                             {data?.averages?.expenses && Object.keys(data?.averages?.expenses).map(cat => (
-                                <Text>{cat}: {data?.averages?.expenses[cat]}</Text>
-                            )) }
+                                <Text>{cat}: {parseMoney(data?.averages?.expenses[cat])}</Text>
+                            ))}
                         </Box>
                     </CardBody>
                 </Card>
@@ -127,8 +128,8 @@ export const Charts = () => {
                         <Heading as="h4" size="sm">Média dos ganhos por categoria:</Heading>
                         <Box>
                             {data?.averages?.gains && Object.keys(data?.averages?.gains).map(cat => (
-                                <Text>{cat}: {data?.averages?.gains[cat]}</Text>
-                            )) }
+                                <Text>{cat}: {parseMoney(data?.averages?.gains[cat])}</Text>
+                            ))}
                         </Box>
                     </CardBody>
                 </Card>

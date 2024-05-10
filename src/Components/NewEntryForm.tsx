@@ -1,20 +1,5 @@
 import {
-    Button,
-    ButtonGroup,
-    Flex,
-    IconButton,
-    Input,
-    InputGroup,
-    Modal,
-    ModalBody,
-    ModalCloseButton,
-    ModalContent,
-    ModalFooter,
-    ModalHeader,
-    ModalOverlay,
-    Select,
-    Spinner,
-    useDisclosure
+    Button, Flex, IconButton, Input, InputGroup, Select, Spinner, useDisclosure
 } from "@chakra-ui/react"
 import { Form } from "./Form"
 import { Controller, useForm } from "react-hook-form"
@@ -25,14 +10,11 @@ import { useNavigate } from "react-router-dom"
 import { Route } from "../router"
 import { EntryForm } from "../types/types"
 import { AddIcon } from '@chakra-ui/icons';
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { IMaskInput } from "react-imask"
 import { useRef } from "react"
 import { toast } from "../helpers/toast"
-
-type CategoryAdd = {
-    name: string
-}
+import { NewCategoryModal } from "./NewCategoryModal"
 
 export const NewEntryForm = () => {
     const ref = useRef(null);
@@ -40,7 +22,6 @@ export const NewEntryForm = () => {
     const { isLoggedIn, loggedUser } = useAuthStore();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const navigate = useNavigate();
-    const queryClient = useQueryClient();
 
     const entryForm = useForm<EntryForm>({
         defaultValues: {
@@ -51,12 +32,7 @@ export const NewEntryForm = () => {
         },
         shouldUnregister: false
     });
-    const categoryForm = useForm<CategoryAdd>({
-        defaultValues: { name: undefined },
-        shouldUnregister: false
-    });
 
-    const { register: registerCategory, reset: resetCategory } = categoryForm;
     const { register, control } = entryForm;
 
     const onSubmit = entryForm.handleSubmit(async (formData: EntryForm) => {
@@ -95,26 +71,6 @@ export const NewEntryForm = () => {
         enabled: isLoggedIn && !!loggedUser.email?.length,
     })
 
-    const saveCategory = async (c: CategoryAdd) => {
-        if (!isLoggedIn) return;
-        try {
-            await addDoc(collection(db, "users", `${loggedUser.email}`, "categories"), { ...c });
-        } catch (e) { }
-    }
-
-    const { mutate: mutateCategory, isPending } = useMutation({
-        mutationFn: (c: CategoryAdd) => saveCategory(c),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['categories'] })
-            resetCategory();
-            onClose();
-            toast.success('Categoria criada!');
-        },
-        onError: () => { toast.error('Algo deu errado :(') }
-    })
-
-    const onSubmitCategory = categoryForm.handleSubmit(async (formData: CategoryAdd) => { mutateCategory(formData); })
-
     if (isFetching) {
         return (
             <Flex w="full" align="center" justify="center" h="full">
@@ -125,28 +81,7 @@ export const NewEntryForm = () => {
 
     return (
         <Flex w="full" flexDirection="column">
-            <Modal isOpen={isOpen} onClose={onClose}>
-                <ModalOverlay />
-                <ModalContent>
-                    <ModalHeader>Nova categoria</ModalHeader>
-                    <ModalCloseButton />
-                    <ModalBody>
-                        <Form form={categoryForm}>
-                            <InputGroup>
-                                <Input {...registerCategory('name', { required: true })} />
-                            </InputGroup>
-                        </Form>
-                    </ModalBody>
-                    <ModalFooter>
-                        <ButtonGroup isDisabled={isPending}>
-                            <Button variant='ghost' onClick={onClose}>Cancelar</Button>
-                            <Button colorScheme='blue' mr={3} onClick={onSubmitCategory}>
-                                Adicionar
-                            </Button>
-                        </ButtonGroup>
-                    </ModalFooter>
-                </ModalContent>
-            </Modal>
+            <NewCategoryModal isOpen={isOpen} onClose={onClose} />
             <Form form={entryForm}>
                 <InputGroup size="md">
                     <Input {...register('title', { required: true })} name="title" placeholder="Título" mb={4} />

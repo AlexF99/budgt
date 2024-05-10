@@ -8,6 +8,7 @@ import { Fragment, useState } from 'react';
 import _ from 'lodash';
 import { DeleteIcon } from "@chakra-ui/icons";
 import { DeleteDialog } from "../Components/DeleteDialog";
+import { parseMoney } from "../helpers/parseMoney";
 
 export const Home = () => {
     const { isLoggedIn, loggedUser } = useAuthStore();
@@ -40,8 +41,6 @@ export const Home = () => {
         enabled: isLoggedIn && !!loggedUser.email?.length,
     })
 
-    const parseMoney = (amount?: number) => amount?.toFixed(2).replace('.', ',') ?? '';
-
     if (isFetching) {
         return (
             <Flex w="full" align="center" justify="center" h="full">
@@ -57,17 +56,17 @@ export const Home = () => {
                 <CardBody>
                     <Flex>
                         <Flex direction="column" align="center" justify="center" w="full">
-                            <Text>Total Ganhos:</Text>
+                            <Text>Ganhos:</Text>
                             <Text>{parseMoney(data?.info?.gains)}</Text>
                         </Flex>
                         <Flex direction="column" align="center" justify="center" w="full">
-                            <Text>Total Gastos:</Text>
+                            <Text>Gastos:</Text>
                             <Text>{parseMoney(data?.info?.expenses)}</Text>
                         </Flex>
                     </Flex>
                     <Flex>
                         <Flex direction="column" align="center" justify="center" w="full">
-                            <Text>Total:</Text>
+                            <Text>Balanço:</Text>
                             <Text>{parseMoney(data?.info?.total)}</Text>
                         </Flex>
                     </Flex>
@@ -104,7 +103,7 @@ export const Home = () => {
                                     </Flex>
                                     <Flex direction="column" align="center" justify="center" w="full">
                                         <Badge colorScheme={entry.type === "expense" ? "red" : "green"}>{entry.type === "expense" ? "Gasto" : "Ganho"}</Badge>
-                                        <Text>{entry.amountInt},{entry.amountDec < 10 ? `0${entry.amountDec}` : entry.amountDec}</Text>
+                                        <Text>{parseMoney(entry.amountInt + (entry.amountDec / 100))}</Text>
                                     </Flex>
                                 </Flex>
                             </CardBody>
