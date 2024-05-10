@@ -74,7 +74,7 @@ export const Home = () => {
                 </CardBody>
             </Card>
             <Heading as="h3" size="md" mt={5}>Histórico:</Heading>
-            <DeleteDialog onClose={onClose} entryId={entryId} isOpen={isOpen} />
+            <DeleteDialog onClose={onClose} entityId={entryId} isOpen={isOpen} path="entries" invalidateQueryId="history" />
             {data?.grouped ? Object.keys(data?.grouped)?.map((date: string) => (
                 <Fragment key={date}>
                     <Heading as="h4" size="sm" mt={4}>{date}</Heading>

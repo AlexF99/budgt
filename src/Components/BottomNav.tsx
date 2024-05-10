@@ -57,7 +57,7 @@ export const BottomNav = () => {
                 </Flex>
                 <Flex justify={'center'}>
                     <IconButton
-                        onClick={() => { navigate(Route.PROFILE, { replace: true }) }}
+                        onClick={() => { navigate(Route.SETTINGS, { replace: true }) }}
                         icon={<SettingsIcon w={3} h={3} />}
                         variant={'ghost'}
                         aria-label={'Toggle Navigation'}
