@@ -1,6 +1,6 @@
 :root {
     --navbar-height: 60px;
-    --bottom-nav-height: 76px;
+    --bottom-nav-height: 80px;
 
     --text-color: #ffffff;
     --selected-text-color: #8ebbff;
@@ -28,4 +28,13 @@
     touch-action: none;
     overflow: hidden;
     overscroll-behavior: none;
+}
+
+.PageContainer {
+    position: fixed;
+    top: var(--navbar-height);
+    bottom: var(--bottom-nav-height);
+    width: 100vw;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }

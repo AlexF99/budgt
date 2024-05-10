@@ -28,13 +28,13 @@ import { AddIcon } from '@chakra-ui/icons';
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { IMaskInput } from "react-imask"
 import { useRef } from "react"
+import { toast } from "../helpers/toast"
 
 type CategoryAdd = {
     name: string
 }
 
 export const NewEntryForm = () => {
-    // use ref to get access to internal "masked = ref.current.maskRef"
     const ref = useRef(null);
     const inputRef = useRef(null);
     const { isLoggedIn, loggedUser } = useAuthStore();
@@ -60,19 +60,23 @@ export const NewEntryForm = () => {
     const { register, control } = entryForm;
 
     const onSubmit = entryForm.handleSubmit(async (formData: EntryForm) => {
-        if (!isLoggedIn) return;
+        if (!isLoggedIn) {
+            toast.info('É necessário logar para salvar um registro!')
+            return;
+        };
 
         const x = parseFloat(`${formData.amount}`.replace(',', '.'));
-
         const amountInt = Math.trunc(x);
         const amountDec = Number((x - amountInt).toFixed(2)) * 100;
-
         const entry = { ...formData, amountDec: isNaN(amountDec) ? 0 : amountDec, amountInt }
 
         try {
             await addDoc(collection(db, "users", `${loggedUser.email}`, "entries"), { ...entry });
+            toast.success('Registro salvo!');
             navigate(Route.HOME, { replace: true })
-        } catch (e) { }
+        } catch (e) {
+            toast.error('Não foi possível salvar o registro :(');
+        }
     })
 
     const getCategories = async () => {
@@ -98,18 +102,18 @@ export const NewEntryForm = () => {
         } catch (e) { }
     }
 
-    const { mutateAsync: mutateAsyncCategory, isPending } = useMutation({
+    const { mutate: mutateCategory, isPending } = useMutation({
         mutationFn: (c: CategoryAdd) => saveCategory(c),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['categories'] })
             resetCategory();
             onClose();
-        }
+            toast.success('Categoria criada!');
+        },
+        onError: () => { toast.error('Algo deu errado :(') }
     })
 
-    const onSubmitCategory = categoryForm.handleSubmit(async (formData: CategoryAdd) => {
-        await mutateAsyncCategory(formData);
-    })
+    const onSubmitCategory = categoryForm.handleSubmit(async (formData: CategoryAdd) => { mutateCategory(formData); })
 
     if (isFetching) {
         return (

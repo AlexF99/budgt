@@ -28,19 +28,19 @@ function App() {
   }, [resetStore, setLoggedUser])
 
   return (
-    <div className="App">
+    <Box className="App">
       <ChakraProvider>
         <QueryClientProvider client={queryClient}>
-          <div className="AppContainer">
+          <Box className="AppContainer">
             <Navbar />
-            <Box p={4} h="calc(100vh - 140px)" overflow="auto">
+            <Box p={4} className='PageContainer'>
               <Outlet />
             </Box>
             <BottomNav />
-          </div>
+          </Box>
         </QueryClientProvider>
       </ChakraProvider>
-    </div>
+    </Box>
   );
 }
 

@@ -113,7 +113,7 @@ export const Charts = () => {
             </Box>
             <Box mt={4}>
                 <Heading as="h3" size="md">Ganhos:</Heading>
-                <ResponsiveContainer aspect={1.2} maxHeight={200}>
+                <ResponsiveContainer aspect={1.2} maxHeight={500}>
                     <PieChart>
                         <Pie isAnimationActive={false}
                             data={data?.gains} dataKey="value"
