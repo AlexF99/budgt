@@ -10,12 +10,14 @@ import { useAuthStore } from "../zustand/authStore";
 import { Entry } from "../types/types";
 import { Fragment, useEffect, useRef, useState } from 'react';
 import _ from 'lodash';
-import { CloseIcon, DeleteIcon, HamburgerIcon } from "@chakra-ui/icons";
+import { CloseIcon, DeleteIcon, EditIcon, HamburgerIcon } from "@chakra-ui/icons";
 import { DeleteDialog } from "../Components/DeleteDialog";
 import { parseMoney } from "../helpers/parseMoney";
 import { Controller, useForm } from "react-hook-form";
 import { Form } from "../Components/Form";
 import moment from "moment";
+import { useNavigate } from "react-router-dom";
+import { Route } from "../router";
 
 type Filter = {
     month: string,
@@ -62,7 +64,8 @@ export const Home = () => {
     const { isLoggedIn, loggedUser } = useAuthStore();
     const [entryId, setEntryId] = useState<string | undefined>(undefined);
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const { isOpen: isFilterOpen, onOpen: onFilterOpen, onClose: onFilterClose } = useDisclosure()
+    const { isOpen: isFilterOpen, onOpen: onFilterOpen, onClose: onFilterClose } = useDisclosure();
+    const navigate=useNavigate();
     const initial = { gains: 0, expenses: 0, total: 0 };
 
     const getUserHistory = async (dateRange?: { dateFrom: Date, dateUntil: Date }) => {
@@ -224,6 +227,9 @@ export const Home = () => {
                                                     onOpen();
                                                 }}>
                                                     Remover
+                                                </MenuItem>
+                                                <MenuItem icon={<EditIcon />} onClick={() => { navigate(Route.EDIT +'/'+ entry.id, { replace: true }) }}>
+                                                    Editar
                                                 </MenuItem>
                                             </MenuList>
                                         </Menu>

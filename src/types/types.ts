@@ -12,7 +12,7 @@ type EntryForm = {
     title: string,
     category: string,
     createdAt: Date,
-    amount: number,
+    amount: string,
     type: string,
 }
 

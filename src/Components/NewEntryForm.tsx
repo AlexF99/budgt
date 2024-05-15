@@ -3,7 +3,7 @@ import {
 } from "@chakra-ui/react"
 import { Form } from "./Form"
 import { Controller, useForm } from "react-hook-form"
-import { addDoc, collection, getDocs, query } from "firebase/firestore"
+import { addDoc, collection, doc, getDoc, getDocs, query, updateDoc } from "firebase/firestore"
 import { db } from "../firebase"
 import { useAuthStore } from "../zustand/authStore"
 import { useNavigate } from "react-router-dom"
@@ -16,12 +16,45 @@ import { useRef } from "react"
 import { toast } from "../helpers/toast"
 import { NewCategoryModal } from "./NewCategoryModal"
 
-export const NewEntryForm = () => {
+type EntryFormProps = {
+    id?: string,
+}
+
+export const NewEntryForm: React.FC<EntryFormProps> = ({ id }) => {
     const ref = useRef(null);
     const inputRef = useRef(null);
     const { isLoggedIn, loggedUser } = useAuthStore();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const navigate = useNavigate();
+
+    const getEntry = async (id?: string) => {
+        if (!id) return null;
+        try {
+            const docRef = doc(db, "users", `${loggedUser?.email}`, "entries", id);
+            const docSnap = await getDoc(docRef);
+            const data = docSnap.data();
+            if (!data) throw Error('Registro não encontrado :(');
+
+            const res = {
+                createdAt: data?.createdAt,
+                type: data?.type,
+                title: data?.title,
+                category: data?.category,
+                amount: `${data?.amountInt + (data?.amountDec / 100)}`,
+            }
+            reset(res);
+            return res;
+        } catch (e: any) {
+            toast.error(e.message);
+            navigate(Route.HOME, { replace: true });
+        }
+    }
+
+    const { isFetching: isFetchingEdit } = useQuery({
+        queryKey: ['entry', id],
+        queryFn: () => getEntry(id),
+        enabled: isLoggedIn && !!loggedUser.email?.length && !!id,
+    })
 
     const entryForm = useForm<EntryForm>({
         defaultValues: {
@@ -33,7 +66,7 @@ export const NewEntryForm = () => {
         shouldUnregister: false
     });
 
-    const { register, control } = entryForm;
+    const { register, control, reset } = entryForm;
 
     const onSubmit = entryForm.handleSubmit(async (formData: EntryForm) => {
         if (!isLoggedIn) {
@@ -47,9 +80,15 @@ export const NewEntryForm = () => {
         const entry = { ...formData, amountDec: isNaN(amountDec) ? 0 : amountDec, amountInt }
 
         try {
-            await addDoc(collection(db, "users", `${loggedUser.email}`, "entries"), { ...entry });
+            if (!id) {
+                await addDoc(collection(db, "users", `${loggedUser.email}`, "entries"), { ...entry });
+            } else {
+                const entryRef = doc(db, "users", `${loggedUser.email}`, "entries", id);
+                await updateDoc(entryRef, { ...entry });
+            }
             toast.success('Registro salvo!');
             navigate(Route.HOME, { replace: true })
+
         } catch (e) {
             toast.error('Não foi possível salvar o registro :(');
         }
@@ -71,7 +110,7 @@ export const NewEntryForm = () => {
         enabled: isLoggedIn && !!loggedUser.email?.length,
     })
 
-    if (isFetching) {
+    if (isFetching || isFetchingEdit) {
         return (
             <Flex w="full" align="center" justify="center" h="full">
                 <Spinner />

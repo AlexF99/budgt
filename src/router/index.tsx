@@ -6,11 +6,13 @@ import { NotFound } from '../views/NotFound'
 import { New } from '../views/New'
 import { Settings } from '../views/Settings'
 import { Charts } from '../views/Charts'
+import { Edit } from '../views/Edit'
 
 enum Route {
     ROOT = '/',
     HOME = '/home',
     NEW = '/new',
+    EDIT = '/edit',
     SETTINGS = '/settings',
     CHARTS = '/charts',
     NOTFOUND = '*',
@@ -28,6 +30,10 @@ const publicRoutes = [
     {
         path: Route.NEW,
         element: <New />,
+    },
+    {
+        path: Route.EDIT + "/:id",
+        element: <Edit />,
     },
     {
         path: Route.SETTINGS,
