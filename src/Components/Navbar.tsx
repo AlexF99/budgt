@@ -40,7 +40,7 @@ export const Navbar = () => {
             textAlign={useBreakpointValue({ base: 'center', md: 'left' })}
             fontFamily={'heading'}
             color={useColorModeValue('gray.800', 'white')}>
-            Logo
+            Budgt
           </Text>
         </Flex>
 
