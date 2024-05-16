@@ -1,23 +1,22 @@
 import {
-    Badge, Button, Card, CardBody, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter,
-    DrawerHeader, DrawerOverlay, Flex, Grid, GridItem, Heading, IconButton, Menu, MenuButton, MenuItem,
-    MenuList, Select, Spinner, Stat, StatArrow, StatGroup, StatHelpText, StatLabel, StatNumber, Tag, Text, useDisclosure
+    Badge, Button, Card, CardBody, Flex, Grid, GridItem, Heading, IconButton, Menu, MenuButton, MenuItem,
+    MenuList, Spinner, Stat, StatArrow, StatGroup, StatHelpText, StatLabel, StatNumber, Tag, Text, useDisclosure
 } from "@chakra-ui/react";
 import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import { db } from "../firebase";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../zustand/authStore";
 import { Entry } from "../types/types";
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useRef, useState } from 'react';
 import _ from 'lodash';
 import { CloseIcon, DeleteIcon, EditIcon, HamburgerIcon } from "@chakra-ui/icons";
 import { DeleteDialog } from "../Components/DeleteDialog";
 import { parseMoney } from "../helpers/parseMoney";
-import { Controller, useForm } from "react-hook-form";
-import { Form } from "../Components/Form";
+import { useForm } from "react-hook-form";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import { Route } from "../router";
+import { FilterDrawer } from "../Components/FilterDrawer";
 
 type Filter = {
     month: string,
@@ -27,45 +26,19 @@ type Filter = {
 export const Home = () => {
     // BEGIN FILTER
     const btnRef = useRef(null);
-    const form = useForm<Filter>();
-    const { control, watch, setValue, reset } = form;
-
-    const [months, setMonths] = useState<any>({});
-
-    useEffect(() => {
-        const monthsOfYear = ["jan", "fev", "mar", "abril", "maio", "jun", "jul", "ago", "set", "out", "nov", "dez"]
-        const monthsAdd: any = {};
-        for (let i = 0; i < 5; i++) {
-            const current = moment().year(moment().year()).month(moment().month() - i)
-            const currentCopy = moment(current);
-            const label = monthsOfYear[current.get('month')] + current.get("year");
-            const monthAdd = {
-                start: current.date(current.startOf('month').date()).toDate(),
-                end: currentCopy.date(currentCopy.endOf('month').date()).toDate()
-            }
-            monthsAdd[label] = monthAdd;
-        }
-        setMonths({ ...months, ...monthsAdd })
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    const handleFilterSubmit = () => {
-        const m = form.getValues('month');
-        setValue('dateRange', { dateFrom: months[m]?.start, dateUntil: months[m]?.end })
-        onFilterClose();
-    }
+    const filterForm = useForm<Filter>();
+    const { watch, reset } = filterForm;
 
     const dateRange = watch('dateRange');
     const month = watch('month');
     const isFilterActive = !!month;
-
     // END FILTER
 
     const { isLoggedIn, loggedUser } = useAuthStore();
     const [entryId, setEntryId] = useState<string | undefined>(undefined);
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: isFilterOpen, onOpen: onFilterOpen, onClose: onFilterClose } = useDisclosure();
-    const navigate=useNavigate();
+    const navigate = useNavigate();
     const initial = { gains: 0, expenses: 0, total: 0 };
 
     const getUserHistory = async (dateRange?: { dateFrom: Date, dateUntil: Date }) => {
@@ -107,46 +80,7 @@ export const Home = () => {
 
     return (
         <>
-            <Drawer
-                isOpen={isFilterOpen}
-                placement='right'
-                onClose={onFilterClose}
-                finalFocusRef={btnRef}
-            >
-                <DrawerOverlay />
-                <DrawerContent>
-                    <DrawerCloseButton />
-                    <DrawerHeader>Selecione o período</DrawerHeader>
-                    <DrawerBody>
-                        <Form form={form}>
-                            <Controller
-                                control={control}
-                                name="month"
-                                render={({ field }) =>
-                                (<Select
-                                    name="month"
-                                    placeholder="Mês"
-                                    defaultValue="tudo"
-                                    onChange={(e) => {
-                                        e.preventDefault();
-                                        field.onChange(e);
-                                    }}
-                                >
-                                    <option value='all'>Tudo</option>
-                                    {Object.keys(months).map(m => (
-                                        <option key={m} value={m}>{m}</option>
-                                    ))}
-                                </Select>)} />
-                        </Form>
-                    </DrawerBody>
-                    <DrawerFooter>
-                        <Button variant='outline' mr={3} onClick={onFilterClose}>
-                            Cancelar
-                        </Button>
-                        <Button colorScheme='blue' onClick={handleFilterSubmit}>Aplicar</Button>
-                    </DrawerFooter>
-                </DrawerContent>
-            </Drawer>
+            <FilterDrawer isFilterOpen={isFilterOpen} onFilterClose={onFilterClose} btnRef={btnRef} form={filterForm} />
             <Card mt={3}>
                 <CardBody p={3}>
                     <StatGroup>
@@ -228,7 +162,7 @@ export const Home = () => {
                                                 }}>
                                                     Remover
                                                 </MenuItem>
-                                                <MenuItem icon={<EditIcon />} onClick={() => { navigate(Route.EDIT +'/'+ entry.id, { replace: true }) }}>
+                                                <MenuItem icon={<EditIcon />} onClick={() => { navigate(Route.EDIT + '/' + entry.id, { replace: true }) }}>
                                                     Editar
                                                 </MenuItem>
                                             </MenuList>
