@@ -1,5 +1,5 @@
 import {
-    Button, Flex, IconButton, Input, InputGroup, Select, Spinner, useDisclosure
+    Button, Flex, IconButton, Input, InputGroup, InputLeftAddon, Select, Spinner, useDisclosure
 } from "@chakra-ui/react"
 import { Form } from "./Form"
 import { Controller, useForm } from "react-hook-form"
@@ -12,7 +12,6 @@ import { EntryForm } from "../types/types"
 import { AddIcon } from '@chakra-ui/icons';
 import { useQuery } from "@tanstack/react-query"
 import { IMaskInput } from "react-imask"
-import { useRef } from "react"
 import { toast } from "../helpers/toast"
 import { NewCategoryModal } from "./NewCategoryModal"
 
@@ -21,8 +20,6 @@ type EntryFormProps = {
 }
 
 export const NewEntryForm: React.FC<EntryFormProps> = ({ id }) => {
-    const ref = useRef(null);
-    const inputRef = useRef(null);
     const { isLoggedIn, loggedUser } = useAuthStore();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const navigate = useNavigate();
@@ -40,7 +37,7 @@ export const NewEntryForm: React.FC<EntryFormProps> = ({ id }) => {
                 type: data?.type,
                 title: data?.title,
                 category: data?.category,
-                amount: `${data?.amountInt + (data?.amountDec / 100)}`,
+                amount: `${data?.amountInt + (data?.amountDec / 100)}`.replace('.', ','),
             }
             reset(res);
             return res;
@@ -146,18 +143,22 @@ export const NewEntryForm: React.FC<EntryFormProps> = ({ id }) => {
                 <Controller
                     control={control}
                     name="amount"
-                    render={({ field }) =>
-                    (<IMaskInput
-                        mask={Number}
-                        radix=","
-                        unmask={true} // true|false|'typed'
-                        ref={ref}
-                        inputRef={inputRef}  // access to nested input
-                        onChange={(value) => field.onChange(value)}
-                        placeholder='Valor (R$)'
-                        style={{ border: 'none', padding: '5px', marginRight: '5px' }}
-                    />)} />
-                <Button type="button" onClick={onSubmit}>Enviar</Button>
+                    render={({ field: { value, onChange } }) => (
+                        <InputGroup>
+                            <InputLeftAddon>R$ </InputLeftAddon>
+                            <Input
+                                min={0.01}
+                                as={IMaskInput}
+                                mask={Number}
+                                value={String(value)}
+                                name="amount"
+                                onAccept={(val: string) => onChange(val)}
+
+                            />
+                        </InputGroup>
+                    )}
+                />
+                <Button mt={2} type="button" onClick={onSubmit}>Salvar</Button>
             </Form>
         </Flex>
     )
