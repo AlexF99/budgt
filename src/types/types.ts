@@ -16,4 +16,9 @@ type EntryForm = {
     type: string,
 }
 
-export type { Entry, EntryForm };
+type Filter = {
+    month: string,
+    dateRange: { dateFrom: Date, dateUntil: Date },
+}
+
+export type { Entry, EntryForm, Filter };

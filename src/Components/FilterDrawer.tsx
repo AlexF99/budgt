@@ -1,13 +1,9 @@
-import { Button, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Select } from "@chakra-ui/react";
+import { Button, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Select, Stack } from "@chakra-ui/react";
 import { Form } from "./Form";
 import { Controller, UseFormReturn } from "react-hook-form";
 import { FC, MutableRefObject, useEffect, useState } from "react";
 import moment from "moment";
-
-type Filter = {
-    month: string,
-    dateRange: { dateFrom: Date, dateUntil: Date },
-}
+import { Filter } from "../types/types";
 
 type FilterDrawerProps = {
     form: UseFormReturn<Filter, any, undefined>,
@@ -18,7 +14,6 @@ type FilterDrawerProps = {
 
 const FilterDrawer: FC<FilterDrawerProps> = ({ form, isFilterOpen, onFilterClose, btnRef }) => {
     const { control, setValue } = form;
-
     const [months, setMonths] = useState<any>({});
 
     useEffect(() => {
@@ -58,24 +53,26 @@ const FilterDrawer: FC<FilterDrawerProps> = ({ form, isFilterOpen, onFilterClose
                 <DrawerHeader>Selecione o período</DrawerHeader>
                 <DrawerBody>
                     <Form form={form}>
-                        <Controller
-                            control={control}
-                            name="month"
-                            render={({ field }) =>
-                            (<Select
+                        <Stack spacing={2}>
+                            <Controller
+                                control={control}
                                 name="month"
-                                placeholder="Mês"
-                                defaultValue="tudo"
-                                onChange={(e) => {
-                                    e.preventDefault();
-                                    field.onChange(e);
-                                }}
-                            >
-                                <option value='all'>Tudo</option>
-                                {Object.keys(months).map(m => (
-                                    <option key={m} value={m}>{m}</option>
-                                ))}
-                            </Select>)} />
+                                render={({ field }) =>
+                                (<Select
+                                    name="month"
+                                    placeholder="Mês"
+                                    defaultValue="tudo"
+                                    onChange={(e) => {
+                                        e.preventDefault();
+                                        field.onChange(e);
+                                    }}
+                                >
+                                    <option value='all'>Tudo</option>
+                                    {Object.keys(months).map(m => (
+                                        <option key={m} value={m}>{m}</option>
+                                    ))}
+                                </Select>)} />
+                        </Stack>
                     </Form>
                 </DrawerBody>
                 <DrawerFooter>

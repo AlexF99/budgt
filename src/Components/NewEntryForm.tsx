@@ -3,7 +3,7 @@ import {
 } from "@chakra-ui/react"
 import { Form } from "./Form"
 import { Controller, useForm } from "react-hook-form"
-import { addDoc, collection, doc, getDoc, getDocs, query, updateDoc } from "firebase/firestore"
+import { addDoc, collection, doc, getDoc, updateDoc } from "firebase/firestore"
 import { db } from "../firebase"
 import { useAuthStore } from "../zustand/authStore"
 import { useNavigate } from "react-router-dom"
@@ -14,6 +14,7 @@ import { useQuery } from "@tanstack/react-query"
 import { IMaskInput } from "react-imask"
 import { toast } from "../helpers/toast"
 import { NewCategoryModal } from "./NewCategoryModal"
+import { useQueryCategories } from "../hooks/useQueryCategories"
 
 type EntryFormProps = {
     id?: string,
@@ -91,21 +92,8 @@ export const NewEntryForm: React.FC<EntryFormProps> = ({ id }) => {
         }
     })
 
-    const getCategories = async () => {
-        const q = query(collection(db, "users", `${loggedUser?.email}`, "categories"));
-        const querySnapshot = await getDocs(q);
-        const categs: any[] = []
-        querySnapshot.forEach((doc) => {
-            categs.push({ ...doc.data(), id: doc.id })
-        });
-        return categs;
-    }
+    const { data: categories, isFetching } = useQueryCategories();
 
-    const { data: categories, isFetching } = useQuery({
-        queryKey: ['categories'],
-        queryFn: () => getCategories(),
-        enabled: isLoggedIn && !!loggedUser.email?.length,
-    })
 
     if (isFetching || isFetchingEdit) {
         return (

@@ -1,34 +1,16 @@
 import { Box, Button, Card, CardBody, Flex, Heading, IconButton, Spinner, useDisclosure } from "@chakra-ui/react";
-import { collection, getDocs, query } from "firebase/firestore";
-import { db } from "../firebase";
-import { useAuthStore } from "../zustand/authStore";
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { DeleteDialog } from "../Components/DeleteDialog";
 import { DeleteIcon } from "@chakra-ui/icons";
 import { NewCategoryModal } from "../Components/NewCategoryModal";
+import { useQueryCategories } from "../hooks/useQueryCategories";
 
 export const Settings = () => {
-    const { loggedUser, isLoggedIn } = useAuthStore();
     const [categoryId, setCategoryId] = useState<string | undefined>(undefined);
     const { isOpen: isDeleteDialogOpen, onOpen: onDeleteDialogOpen, onClose: onDeleteDialogClose } = useDisclosure();
     const { isOpen: isCategoryModalOpen, onOpen: onCategoryModalOpen, onClose: onCategoryModalClose } = useDisclosure();
 
-    const getCategories = async () => {
-        const q = query(collection(db, "users", `${loggedUser?.email}`, "categories"));
-        const querySnapshot = await getDocs(q);
-        const categs: any[] = []
-        querySnapshot.forEach((doc) => {
-            categs.push({ ...doc.data(), id: doc.id })
-        });
-        return categs;
-    }
-
-    const { data: categories, isFetching } = useQuery({
-        queryKey: ['categories'],
-        queryFn: () => getCategories(),
-        enabled: isLoggedIn && !!loggedUser.email?.length,
-    })
+    const { data: categories, isFetching } = useQueryCategories();
 
     if (isFetching) {
         return (
@@ -37,7 +19,6 @@ export const Settings = () => {
             </Flex>
         )
     }
-
     return (
         <Box>
             <NewCategoryModal isOpen={isCategoryModalOpen} onClose={onCategoryModalClose} />

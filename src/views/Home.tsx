@@ -2,11 +2,11 @@ import {
     Badge, Button, Card, CardBody, Flex, Grid, GridItem, Heading, IconButton, Menu, MenuButton, MenuItem,
     MenuList, Spinner, Stat, StatArrow, StatGroup, StatHelpText, StatLabel, StatNumber, Tag, Text, useDisclosure
 } from "@chakra-ui/react";
-import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
+import { QueryFieldFilterConstraint, collection, getDocs, orderBy, query, where } from "firebase/firestore";
 import { db } from "../firebase";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "../zustand/authStore";
-import { Entry } from "../types/types";
+import { Entry, Filter } from "../types/types";
 import { Fragment, useRef, useState } from 'react';
 import _ from 'lodash';
 import { CloseIcon, DeleteIcon, EditIcon, HamburgerIcon } from "@chakra-ui/icons";
@@ -18,14 +18,9 @@ import { useNavigate } from "react-router-dom";
 import { Route } from "../router";
 import { FilterDrawer } from "../Components/FilterDrawer";
 
-type Filter = {
-    month: string,
-    dateRange: { dateFrom: Date, dateUntil: Date },
-}
-
 export const Home = () => {
     // BEGIN FILTER
-    const btnRef = useRef(null);
+    const openFilterBtnRef = useRef(null);
     const filterForm = useForm<Filter>();
     const { watch, reset } = filterForm;
 
@@ -41,12 +36,13 @@ export const Home = () => {
     const navigate = useNavigate();
     const initial = { gains: 0, expenses: 0, total: 0 };
 
-    const getUserHistory = async (dateRange?: { dateFrom: Date, dateUntil: Date }) => {
-        const q = dateRange && dateRange.dateFrom && dateRange.dateUntil
-            ? query(collection(db, "users", `${loggedUser?.email}`, "entries"),
-                where("createdAt", "<=", dateRange.dateUntil),
-                where("createdAt", ">=", dateRange.dateFrom), orderBy("createdAt", "desc"))
-            : query(collection(db, "users", `${loggedUser?.email}`, "entries"), orderBy("createdAt", "desc"));
+    const getUserHistory = async (dateRange?: { dateFrom: Date, dateUntil: Date }, category?: string) => {
+        const whereClauses: QueryFieldFilterConstraint[] = [];
+        if (dateRange && dateRange.dateFrom && dateRange.dateUntil) {
+            whereClauses.push(...[where("createdAt", "<=", dateRange.dateUntil), where("createdAt", ">=", dateRange.dateFrom)])
+        }
+        const q = query(collection(db, "users", `${loggedUser?.email}`, "entries"),
+            ...whereClauses, orderBy("createdAt", "desc"))
         const querySnapshot = await getDocs(q);
         const hist: any[] = []
         const info = { ...initial };
@@ -73,14 +69,14 @@ export const Home = () => {
     if (isFetching) {
         return (
             <Flex w="full" align="center" justify="center" h="full">
-                < Spinner />
+                <Spinner />
             </Flex >
         )
     }
 
     return (
         <>
-            <FilterDrawer isFilterOpen={isFilterOpen} onFilterClose={onFilterClose} btnRef={btnRef} form={filterForm} />
+            <FilterDrawer isFilterOpen={isFilterOpen} onFilterClose={onFilterClose} btnRef={openFilterBtnRef} form={filterForm} />
             <Card mt={3}>
                 <CardBody p={3}>
                     <StatGroup>
@@ -118,7 +114,7 @@ export const Home = () => {
                             />
                         </Flex>
                     }
-                    <Button ref={btnRef}
+                    <Button ref={openFilterBtnRef}
                         colorScheme='teal'
                         size="sm"
                         ml={1}
