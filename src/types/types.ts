@@ -17,8 +17,10 @@ type EntryForm = {
 }
 
 type Filter = {
-    month: string,
-    dateRange: { dateFrom: Date, dateUntil: Date },
+    month?: string,
+    dateFrom?: Date,
+    dateUntil?: Date,
+    category?: string,
 }
 
 export type { Entry, EntryForm, Filter };

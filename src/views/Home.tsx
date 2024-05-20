@@ -12,21 +12,16 @@ import _ from 'lodash';
 import { CloseIcon, DeleteIcon, EditIcon, HamburgerIcon } from "@chakra-ui/icons";
 import { DeleteDialog } from "../Components/DeleteDialog";
 import { parseMoney } from "../helpers/parseMoney";
-import { useForm } from "react-hook-form";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import { Route } from "../router";
 import { FilterDrawer } from "../Components/FilterDrawer";
+import { useFilter } from "../hooks/useFilter";
 
 export const Home = () => {
     // BEGIN FILTER
     const openFilterBtnRef = useRef(null);
-    const filterForm = useForm<Filter>();
-    const { watch, reset } = filterForm;
-
-    const dateRange = watch('dateRange');
-    const month = watch('month');
-    const isFilterActive = !!month;
+    const { filterData, setFilterData, isFilterActive } = useFilter();
     // END FILTER
 
     const { isLoggedIn, loggedUser } = useAuthStore();
@@ -36,33 +31,32 @@ export const Home = () => {
     const navigate = useNavigate();
     const initial = { gains: 0, expenses: 0, total: 0 };
 
-    const getUserHistory = async (dateRange?: { dateFrom: Date, dateUntil: Date }, category?: string) => {
-        const whereClauses: QueryFieldFilterConstraint[] = [];
-        if (dateRange && dateRange.dateFrom && dateRange.dateUntil) {
-            whereClauses.push(...[where("createdAt", "<=", dateRange.dateUntil), where("createdAt", ">=", dateRange.dateFrom)])
-        }
-        const q = query(collection(db, "users", `${loggedUser?.email}`, "entries"),
-            ...whereClauses, orderBy("createdAt", "desc"))
-        const querySnapshot = await getDocs(q);
-        const hist: any[] = []
-        const info = { ...initial };
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            const amount: number = data.amountInt + (data.amountDec / 100);
-            info.gains += data.type === "gain" ? amount : 0;
-            info.expenses += data.type === "expense" ? amount : 0;
-            hist.push({ ...data, id: doc.id, createdAt: moment(data.createdAt.toDate()).format('D/MM/YYYY') })
-        });
-        info.total += info.gains - info.expenses;
+    const getUserHistory = async (filterData: Filter) => {
+        const { dateFrom, dateUntil, category } = filterData;
+        const whereClauses: QueryFieldFilterConstraint[] = dateFrom && dateUntil ?
+            [where("createdAt", "<=", dateUntil), where("createdAt", ">=", dateFrom)] : [];
+        const queryByDate = query(collection(db, "users", `${loggedUser?.email}`, "entries"),
+            ...whereClauses, orderBy("createdAt", "desc"));
 
-        const grouped = _.groupBy(hist, 'createdAt');
+        const qsDate = await getDocs(queryByDate);
+        const hist: any[] = qsDate.docs
+            .map(d => ({ ...d.data(), id: d.id, createdAt: moment(d.data().createdAt.toDate()).format('D/MM/YYYY') }))
+            .filter((e: any) => !category ? true : e.category === category);
 
+        const info = hist.reduce((acc, curr) => {
+            const amount: number = curr.amountInt + (curr.amountDec / 100);
+            const gains = acc.gains + (curr.type === "gain" ? amount : 0);
+            const expenses = acc.expenses + (curr.type === "expense" ? amount : 0);
+            return { gains, expenses };
+        }, initial);
+        info.total = info.gains - info.expenses;
+        const grouped = _.groupBy(category ? hist.filter(e => e.category === category) : hist, 'createdAt');
         return { info, grouped };
     }
 
     const { data, isFetching } = useQuery({
-        queryKey: ['history', dateRange],
-        queryFn: () => getUserHistory(dateRange),
+        queryKey: ['history', filterData],
+        queryFn: () => getUserHistory(filterData),
         enabled: isLoggedIn && !!loggedUser.email?.length,
     })
 
@@ -76,7 +70,12 @@ export const Home = () => {
 
     return (
         <>
-            <FilterDrawer isFilterOpen={isFilterOpen} onFilterClose={onFilterClose} btnRef={openFilterBtnRef} form={filterForm} />
+            <FilterDrawer isFilterOpen={isFilterOpen}
+                onFilterClose={onFilterClose}
+                btnRef={openFilterBtnRef}
+                setFilterData={setFilterData}
+                filterData={filterData}
+            />
             <Card mt={3}>
                 <CardBody p={3}>
                     <StatGroup>
@@ -104,11 +103,11 @@ export const Home = () => {
                     {isFilterActive &&
                         <Flex>
                             <Tag size="lg" ml={4} colorScheme="gray">
-                                {month}
+                                Limpar filtro
                             </Tag>
                             <IconButton
                                 size="sm"
-                                onClick={() => reset()}
+                                onClick={() => setFilterData({})}
                                 icon={<CloseIcon w={3} h={3} />}
                                 aria-label={'Toggle Navigation'}
                             />
