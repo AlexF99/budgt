@@ -1,10 +1,9 @@
-import { Box, Card, CardBody, Flex, Heading, Spinner, Text } from "@chakra-ui/react";
+import { Box, Flex, Heading, SimpleGrid, Spinner } from "@chakra-ui/react";
 import { collection, getDocs, query } from "firebase/firestore";
 import { Bar, BarChart, CartesianGrid, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { db } from "../firebase";
 import { useAuthStore } from "../zustand/authStore";
 import { useQuery } from "@tanstack/react-query";
-import { parseMoney } from "../helpers/parseMoney";
 
 export const Charts = () => {
 
@@ -44,14 +43,10 @@ export const Charts = () => {
         const totalGains = Object.keys(gains).reduce((acc, curr) => { return acc + gains[curr].amount }, 0)
         const totalExpenses = Object.keys(expenses).reduce((acc, curr) => { return acc + expenses[curr].amount }, 0)
 
-        const averageGainsPerCategory: any = Object.keys(gains).reduce((acc, k) => ({ ...acc, [k]: (gains[k].amount / gains[k].entries) }), {})
-        const averageExpensesPerCategory: any = Object.keys(expenses).reduce((acc, k) => ({ ...acc, [k]: (expenses[k].amount / expenses[k].entries) }), {})
-
         const result = {
             expenses: Object.keys(expenses).map(k => ({ category: k, value: expenses[k].amount, fill: getRandomColor() })),
             gains: Object.keys(gains).map(k => ({ category: k, value: gains[k].amount, fill: getRandomColor() })),
             comparison: [{ name: 'Comparação', ganhos: totalGains.toFixed(2), gastos: totalExpenses.toFixed(2) }],
-            averages: { gains: averageGainsPerCategory, expenses: averageExpensesPerCategory }
         }
         return result;
     }
@@ -90,50 +85,32 @@ export const Charts = () => {
                     </BarChart>
                 </ResponsiveContainer>
             </Box>
-            <Box mt={4}>
-                <Heading as="h3" size="md">Gastos:</Heading>
-                <ResponsiveContainer aspect={1.2} maxHeight={500}>
-                    <PieChart>
-                        <Pie isAnimationActive={false}
-                            data={data?.expenses} dataKey="value"
-                            nameKey="category"
-                            innerRadius={60} outerRadius={80}
-                            label={renderLabel} />
-                    </PieChart>
-                </ResponsiveContainer>
-                <Card mt={2}>
-                    <CardBody>
-                        <Heading as="h4" size="sm">Média dos gastos por categoria:</Heading>
-                        <Box>
-                            {data?.averages?.expenses && Object.keys(data?.averages?.expenses).map(cat => (
-                                <Text>{cat}: {parseMoney(data?.averages?.expenses[cat])}</Text>
-                            ))}
-                        </Box>
-                    </CardBody>
-                </Card>
-            </Box>
-            <Box mt={4}>
-                <Heading as="h3" size="md">Ganhos:</Heading>
-                <ResponsiveContainer aspect={1.2} maxHeight={500}>
-                    <PieChart>
-                        <Pie isAnimationActive={false}
-                            data={data?.gains} dataKey="value"
-                            nameKey="category"
-                            innerRadius={60} outerRadius={80}
-                            label={renderLabel} />
-                    </PieChart>
-                </ResponsiveContainer>
-                <Card mt={2}>
-                    <CardBody>
-                        <Heading as="h4" size="sm">Média dos ganhos por categoria:</Heading>
-                        <Box>
-                            {data?.averages?.gains && Object.keys(data?.averages?.gains).map(cat => (
-                                <Text>{cat}: {parseMoney(data?.averages?.gains[cat])}</Text>
-                            ))}
-                        </Box>
-                    </CardBody>
-                </Card>
-            </Box>
+            <SimpleGrid columns={[1, null, 2]} spacing='40px'>
+                <Box mt={4}>
+                    <Heading as="h3" size="md">Gastos:</Heading>
+                    <ResponsiveContainer aspect={1.2} maxHeight={500}>
+                        <PieChart>
+                            <Pie isAnimationActive={false}
+                                data={data?.expenses} dataKey="value"
+                                nameKey="category"
+                                innerRadius={60} outerRadius={80}
+                                label={renderLabel} />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </Box>
+                <Box mt={4}>
+                    <Heading as="h3" size="md">Ganhos:</Heading>
+                    <ResponsiveContainer aspect={1.2} maxHeight={500}>
+                        <PieChart>
+                            <Pie isAnimationActive={false}
+                                data={data?.gains} dataKey="value"
+                                nameKey="category"
+                                innerRadius={60} outerRadius={80}
+                                label={renderLabel} />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </Box>
+            </SimpleGrid>
         </Box>
     )
 }

@@ -19,10 +19,8 @@ import { FilterDrawer } from "../Components/FilterDrawer";
 import { useFilter } from "../hooks/useFilter";
 
 export const Home = () => {
-    // BEGIN FILTER
     const openFilterBtnRef = useRef(null);
     const { filterData, setFilterData, isFilterActive } = useFilter();
-    // END FILTER
 
     const { isLoggedIn, loggedUser } = useAuthStore();
     const [entryId, setEntryId] = useState<string | undefined>(undefined);
@@ -103,7 +101,7 @@ export const Home = () => {
                     {isFilterActive &&
                         <Flex>
                             <Tag size="lg" ml={4} colorScheme="gray">
-                                Limpar filtro
+                                {filterData.month}
                             </Tag>
                             <IconButton
                                 size="sm"
