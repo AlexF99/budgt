@@ -8,10 +8,10 @@ import {
 } from "@chakra-ui/react";
 import { Form } from "./Form";
 import { useForm } from "react-hook-form";
-import { FC, MutableRefObject, useEffect, useState } from "react";
-import moment from "moment";
+import { FC, MutableRefObject } from "react";
 import { Filter } from "../types/types";
 import { useQueryCategories } from "../hooks/useQueryCategories";
+import { useFilter } from "../hooks/useFilter";
 
 type FilterDrawerProps = {
     filterData: Filter
@@ -24,25 +24,9 @@ type FilterDrawerProps = {
 const FilterDrawer: FC<FilterDrawerProps> = ({ isFilterOpen, onFilterClose, btnRef, setFilterData, filterData }) => {
 
     const form = useForm<Filter>({ defaultValues: filterData, shouldUnregister: false });
-    const { register } = form;
-    const [months, setMonths] = useState<any>({});
+    const { months } = useFilter();
 
-    useEffect(() => {
-        const monthsOfYear = ["jan", "fev", "mar", "abril", "maio", "jun", "jul", "ago", "set", "out", "nov", "dez"]
-        const monthsAdd: any = {};
-        for (let i = 0; i < 5; i++) {
-            const current = moment().year(moment().year()).month(moment().month() - i)
-            const currentCopy = moment(current);
-            const label = monthsOfYear[current.get('month')] + current.get("year");
-            const monthAdd = {
-                start: current.date(current.startOf('month').date()).toDate(),
-                end: currentCopy.date(currentCopy.endOf('month').date()).toDate()
-            }
-            monthsAdd[label] = monthAdd;
-        }
-        setMonths({ ...months, ...monthsAdd })
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    const { register } = form;
 
     const handleFilterSubmit = () => {
         const m = form.getValues('month');
